@@ -1,8 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generativeai";
 
-// Vite 환경에서는 import.meta.env를 사용해야 합니다.
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-const ai = new GoogleGenerativeAI(apiKey || "");
+// 1. 환경 변수 설정 (Vite 표준 방식)
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
+const genAI = new GoogleGenerativeAI(API_KEY);
+
+export interface ReceiptData {
   storeName?: string;
   items?: string;
   totalPrice?: string;
@@ -14,65 +16,45 @@ const ai = new GoogleGenerativeAI(apiKey || "");
 }
 
 export async function getFortune(data: ReceiptData) {
-  const model = "gemini-1.5-flash";
-  
-  const systemInstruction = `
-당신은 '영수증 점성술사'이자 '자본주의 무속인'이다. 
-이미지가 제공된다면 이미지 속의 텍스트를 OCR로 읽어내고, 영수증의 구겨진 정도나 글씨체에서도 기운을 느껴라.
-
-[특별 로직]
-- 총액의 마지막 자릿수가 0이면 오늘 공짜 운이 있다고 예언하라.
-- 총액의 마지막 자릿수가 5면 오리걸음으로 집에 가야 할 운명이라고 예언하라.
-
-[지침]
-1. 말투는 매우 고풍스럽고 신비롭지만, 내용은 황당무계하고 킹받게 작성할 것.
-2. 논리적인 분석은 절대 금지. (예: "검은 물을 마신 것을 보니 전생에 먹물을 뿜던 대왕오징어였음이 분명하군")
-3. 각 항목은 1~2문장 내외로 매우 짧고 간결하게 작성할 것.
-4. 반드시 아래의 형식을 지켜서 답변해줘.
-
-[출력 형식]
-영수증의 기운: 
-전생의 흔적: 
-오늘의 예언: 
-금기의 아이템: 
-행운의 부적: 
-  `;
-
-  const userPrompt = `
-사용자가 제출한 영수증 정보:
-- 장소: ${data.storeName || "이미지 확인 필요"}
-- 품목: ${data.items || "이미지 확인 필요"}
-- 총액: ${data.totalPrice || "이미지 확인 필요"}
-- 시간: ${data.paymentTime || "이미지 확인 필요"}
-
-위 정보와 첨부된 이미지를 바탕으로 예언을 하사하라.
-  `;
-
-  const parts: any[] = [{ text: userPrompt }];
-  if (data.image) {
-    parts.push({
-      inlineData: {
-        data: data.image.data,
-        mimeType: data.image.mimeType,
-      },
-    });
-  }
-
   try {
-    const response = await ai.models.generateContent({
-      model,
-      contents: { parts },
-      config: {
-        systemInstruction,
-        temperature: 1,
-        topP: 0.95,
-        topK: 64,
-      }
-    });
+    // 2. 가장 안정적인 모델인 gemini-1.5-flash 사용
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    return response.text || "신령님과의 연결이 잠시 끊겼느니라... 다시 시도해 보거라.";
+    const systemInstruction = `
+      당신은 '영수증 점성술사'이자 '자본주의 무속인'이다.
+      이미지가 제공된다면 이미지 속의 텍스트를 읽고, 영수증의 구겨진 정도나 글씨체에서도 기운을 느껴라.
+      
+      [답변 규칙]
+      1. 매우 신비롭고 엉뚱하며 유머러스한 말투를 사용해라.
+      2. 다음 4가지 항목을 반드시 포함해라:
+         - 영수증의 기운: (전반적인 느낌)
+         - 전생의 흔적: (구매 품목 중 하나를 전생의 물건과 연결)
+         - 오늘의 예언: (말도 안 되는 엉뚱한 미래 예측)
+         - 행운의 아이템: (주변에서 찾을 수 있는 사소한 물건)
+    `;
+
+    const prompt = "이 영수증을 분석해서 나의 운세를 점쳐줘.";
+
+    // 3. 이미지 데이터 처리 및 요청
+    if (data.image) {
+      const result = await model.generateContent([
+        systemInstruction,
+        prompt,
+        {
+          inlineData: {
+            data: data.image.data,
+            mimeType: data.image.mimeType,
+          },
+        },
+      ]);
+      return result.response.text();
+    } else {
+      // 이미지가 없을 때의 처리
+      const result = await model.generateContent([systemInstruction, prompt]);
+      return result.response.text();
+    }
   } catch (error) {
     console.error("Gemini API Error:", error);
-    return "복채가 부족한 것인지, 우주의 기운이 어지럽구나. (에러가 발생했습니다)";
+    return "복채(API 키)가 부족한 것인지, 우주의 기운이 어지럽구나. (에러가 발생했습니다. Vercel 설정을 확인해주세요!)";
   }
 }
