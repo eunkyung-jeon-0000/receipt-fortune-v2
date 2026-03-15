@@ -14,7 +14,7 @@ export interface ReceiptData {
 }
 
 export async function getFortune(data: ReceiptData) {
-  const model = "gemini-3.1-pro-preview";
+  const model = "gemini-1.5-flash";
   
   const systemInstruction = `
 당신은 '영수증 점성술사'이자 '자본주의 무속인'이다. 
