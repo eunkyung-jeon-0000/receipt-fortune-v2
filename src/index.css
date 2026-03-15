@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Pretendard", ui-sans-serif, system-ui, sans-serif;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+body {
+  @apply bg-[#050505] text-zinc-200 min-h-screen overflow-x-hidden antialiased;
+  font-family: var(--font-sans);
+}
+
+.mystical-bg {
+  background: 
+    radial-gradient(circle at 50% 0%, #1a1a1a 0%, transparent 70%),
+    radial-gradient(circle at 0% 100%, #0a0a0a 0%, transparent 50%);
+  background-color: #050505;
+}
+
+.glass-card {
+  @apply bg-zinc-900/50 backdrop-blur-2xl border border-zinc-800/50 rounded-2xl shadow-2xl;
+}
+
+.shaman-input {
+  @apply bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/50 transition-all text-zinc-100 placeholder:text-zinc-700;
+}
+
+.shaman-button {
+  @apply bg-purple-600 hover:bg-purple-500 text-white font-bold text-lg px-8 py-4 rounded-lg shadow-lg shadow-purple-500/10 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden;
+}
+
+.shaman-button::after {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full skew-x-12 transition-transform duration-700;
+}
+
+.shaman-button:hover::after {
+  @apply translate-x-full;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-zinc-800 rounded-full hover:bg-zinc-700;
+}
+
+.fortune-content h3 {
+  @apply text-purple-500 text-sm font-black uppercase tracking-[0.2em] mb-3 mt-8 flex items-center gap-3;
+}
+
+.fortune-content p {
+  @apply text-zinc-300 leading-relaxed text-base mb-6 font-medium;
+}
+
+.fortune-content blockquote {
+  @apply border-l-2 border-purple-500/30 pl-4 italic text-zinc-400;
+}
