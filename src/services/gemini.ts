@@ -1,8 +1,8 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generativeai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.VITE_GEMINI_API_KEY || "" });
-
-export interface ReceiptData {
+// Vite 환경에서는 import.meta.env를 사용해야 합니다.
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+const ai = new GoogleGenerativeAI(apiKey || "");
   storeName?: string;
   items?: string;
   totalPrice?: string;
